@@ -117,6 +117,7 @@ static char originOffsetYKey;
         int  i = 0;
         while (![aimV isKindOfClass:[UIScrollView class]] && i < 6) {
             aimV = aimV.superview;
+            i++;
         }
         
         if ([aimV isKindOfClass:[UIScrollView class]]) {
