@@ -21,10 +21,6 @@ static char originOffsetYKey;
 @end
 @implementation UITextField (IX)
 
-- (void)dealloc
-{
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-}
 
 + (void)load
 {
