@@ -10,14 +10,17 @@
 #import "IXHookUtility.h"
 #import <objc/runtime.h>
 
-static char scrollViewKey;
 static char originYKey;
-static char originOffsetYKey;
+static char animatedKey;
+static char targetViewKey;
+static char isSelfKey;
+
+#define kOffset 10
 
 @interface UITextField ()
-@property (nonatomic, assign) CGFloat    originY;
-@property (nonatomic, assign) CGFloat    originOffsetY;
-@property (nonatomic, weak) UIScrollView    * scrollV;
+@property (nonatomic, assign) CGFloat   originY;    //targetV位置
+@property (nonatomic, assign) BOOL      animated;   //记录是否发生过移动
+@property (nonatomic, assign) BOOL      isSelf;
 @end
 @implementation UITextField (IX)
 
@@ -64,7 +67,7 @@ static char originOffsetYKey;
                                                  name:UIKeyboardWillShowNotification
                                                object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(keyboardWillHide)
+                                             selector:@selector(keyboardWillHide:)
                                                  name:UIKeyboardWillHideNotification
                                                object:nil];
     return [self ix_init];
@@ -77,7 +80,7 @@ static char originOffsetYKey;
                                                  name:UIKeyboardWillShowNotification
                                                object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(keyboardWillHide)
+                                             selector:@selector(keyboardWillHide:)
                                                  name:UIKeyboardWillHideNotification
                                                object:nil];
     return [self ix_initWithFrame:frame];
@@ -85,73 +88,85 @@ static char originOffsetYKey;
 
 - (BOOL)ix_becomeFirstResponder
 {
-    self.originY = [self convertPoint:self.bounds.origin toView:[UIApplication sharedApplication].keyWindow].y;
+    self.isSelf = YES;
     return [self ix_becomeFirstResponder];
 }
 
 - (BOOL)ix_resignFirstResponder
 {
-    self.originY = 0.f;
+    self.isSelf = NO;
     return [self ix_resignFirstResponder];
 }
 
 - (void)keyboardWillShow:(NSNotification *)notify
 {
-    if (self.originY <= 0) {
+    if (!self.targetV || !self.isSelf) {
         return;
     }
 
     NSDictionary    * dic = notify.userInfo;
     CGFloat keyboardH = [dic[@"UIKeyboardBoundsUserInfoKey"] CGRectValue].size.height;
     CGFloat selfH = self.frame.size.height;
-   
-    if ([UIScreen mainScreen].bounds.size.height - keyboardH > self.originY + 20 + selfH) {
+    CGFloat selfPos = [self convertPoint:self.bounds.origin
+                                  toView:[UIApplication sharedApplication].keyWindow].y;
+    
+    if ([UIScreen mainScreen].bounds.size.height - keyboardH > selfPos + kOffset + selfH) {
         NSLog(@"键盘不会被遮挡");
+        if ([self.targetV isKindOfClass:[UIScrollView class]]) {
+            CGFloat offsetY = selfPos - ([UIScreen mainScreen].bounds.size.height - keyboardH - kOffset - selfH);
+            UIScrollView    * scrollV = (UIScrollView *)self.targetV;
+            if (scrollV.contentOffset.y <= 0) {
+                return;
+            }
+            CGFloat y = scrollV.contentOffset.y + offsetY;
+            [scrollV setContentOffset:CGPointMake(0, y) animated:YES];
+        }
     } else {
         NSLog(@"键盘可能会被遮挡");
-        UIView * aimV = self.superview;
-        int  i = 0;
-        while (![aimV isKindOfClass:[UIScrollView class]] && i < 6) {
-            aimV = aimV.superview;
-            i++;
-        }
         
-        if ([aimV isKindOfClass:[UIScrollView class]]) {
-            UIScrollView * scrollView = (UIScrollView *)aimV;
+        if (self.targetV) {
             
-            CGFloat aimY = [UIScreen mainScreen].bounds.size.height - keyboardH - 20 - selfH;
-            self.originOffsetY = self.originY - aimY;
-            [scrollView setContentOffset:CGPointMake(0, scrollView.contentOffset.y + self.originOffsetY) animated:YES];
-        } else {
-            NSLog(@"该text field之上6层未找到scrollView,挪不动啊@~@");
+            CGFloat offsetY = selfPos - ([UIScreen mainScreen].bounds.size.height - keyboardH - kOffset - selfH);
+            if ([self.targetV isKindOfClass:[UIScrollView class]]) {
+                UIScrollView    * scrollV = (UIScrollView *)self.targetV;
+                CGFloat y = scrollV.contentOffset.y + offsetY;
+                [scrollV setContentOffset:CGPointMake(0, y) animated:YES];
+            } else {
+                
+                CGRect  frame = self.targetV.frame;
+                CGFloat time = [dic[@"UIKeyboardAnimationDurationUserInfoKey"] floatValue];
+                frame.origin.y -= offsetY;
+                
+                [UIView animateWithDuration:time delay:0 options:UIViewAnimationOptionCurveEaseIn animations:^{
+                    self.targetV.frame = frame;
+                } completion:nil];
+                
+                self.animated = YES;
+            }
         }
     }
 }
 
-- (void)keyboardWillHide
+- (void)keyboardWillHide:(NSNotification *)notify
 {
-    if (self.originY > 0) {
-        self.originY = 0.f;
-        self.originOffsetY = 0.f;
-        if (self.scrollV) {
-            [self.scrollV setContentOffset:CGPointMake(0, self.scrollV.contentOffset.y - self.originOffsetY)
-                                  animated:YES];
-        }
+    if (self.animated && ![self.targetV isKindOfClass:[UIScrollView class]]) {
+        self.animated = NO;
+        NSDictionary    * dic = notify.userInfo;
+        CGFloat time = [dic[@"UIKeyboardAnimationDurationUserInfoKey"] floatValue];
+        CGRect  frame = self.targetV.frame;
+        frame.origin.y = self.originY;
+        
+        [UIView animateWithDuration:time delay:0 options:UIViewAnimationOptionCurveEaseIn animations:^{
+            self.targetV.frame = frame;
+        } completion:nil];
     }
+    
+    self.originY = 0.f;
+    self.isSelf = NO;
 }
 
 #pragma mark -
 #pragma mark -
-
-
-- (void)setScrollV:(UIScrollView *)scrollV
-{
-    objc_setAssociatedObject(self, &scrollViewKey, scrollV, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-
-- (UIScrollView *)scrollV {
-    return objc_getAssociatedObject(self, &scrollViewKey);
-}
 
 - (void)setOriginY:(CGFloat)originY
 {
@@ -163,14 +178,37 @@ static char originOffsetYKey;
     return [objc_getAssociatedObject(self, &originYKey) floatValue];
 }
 
-- (void)setOriginOffsetY:(CGFloat)originOffsetY
+- (void)setAnimated:(BOOL)animated
 {
-    objc_setAssociatedObject(self, &originOffsetYKey, @(originOffsetY), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &animatedKey, @(animated), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (CGFloat)originOffsetY
+- (BOOL)animated
 {
-    return [objc_getAssociatedObject(self, &originOffsetYKey) floatValue];
+    return [objc_getAssociatedObject(self, &animatedKey) boolValue];
+}
+
+- (void)setIsSelf:(BOOL)isSelf
+{
+    objc_setAssociatedObject(self, &isSelfKey, @(isSelf), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (BOOL)isSelf
+{
+    return [objc_getAssociatedObject(self, &isSelfKey) boolValue];
+}
+
+- (void)setTargetV:(UIView *)targetV
+{
+    if (targetV) {
+        objc_setAssociatedObject(self, &targetViewKey, targetV , OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        self.originY = targetV.frame.origin.y;
+    }
+}
+
+- (UIView *)targetV
+{
+    return objc_getAssociatedObject(self, &targetViewKey);
 }
 
 @end

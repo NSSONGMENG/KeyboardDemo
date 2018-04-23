@@ -7,7 +7,9 @@
 //
 
 #import "ViewController.h"
+#import "Bvc.h"
 #import "TestCell.h"
+#import "UITextField+IX.h"
 
 #define kCellIdent  NSStringFromClass([TestCell class])
 
@@ -51,12 +53,15 @@ UITableViewDataSource
     NSString * str = [NSString stringWithFormat:@"%ld",indexPath.row];
     cell.textF.placeholder = @"请输入内容";
     cell.lab.text = str;
+    cell.textF.targetV = tableView;
     return cell;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    [self.navigationController pushViewController:[Bvc new] animated:YES];
+//    [self.tableV endEditing:YES];
 }
 
 @end

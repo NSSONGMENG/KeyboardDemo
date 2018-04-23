@@ -10,4 +10,6 @@
 
 @interface UITextField (IX)
 
+@property (nonatomic, weak) UIView  * targetV;
+
 @end

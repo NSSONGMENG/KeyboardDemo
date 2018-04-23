@@ -16,6 +16,7 @@
 		143CC85A2069F79600D2C072 /* UITextField+IX.m in Sources */ = {isa = PBXBuildFile; fileRef = 143CC8592069F79600D2C072 /* UITextField+IX.m */; };
 		143CC85D2069F7AA00D2C072 /* IXHookUtility.m in Sources */ = {isa = PBXBuildFile; fileRef = 143CC85C2069F7AA00D2C072 /* IXHookUtility.m */; };
 		143CC8602069F81800D2C072 /* TestCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 143CC85F2069F81800D2C072 /* TestCell.m */; };
+		1466A8E6207CAB89001921BF /* Bvc.m in Sources */ = {isa = PBXBuildFile; fileRef = 1466A8E5207CAB89001921BF /* Bvc.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,6 +36,8 @@
 		143CC85C2069F7AA00D2C072 /* IXHookUtility.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IXHookUtility.m; sourceTree = "<group>"; };
 		143CC85E2069F81800D2C072 /* TestCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TestCell.h; sourceTree = "<group>"; };
 		143CC85F2069F81800D2C072 /* TestCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TestCell.m; sourceTree = "<group>"; };
+		1466A8E4207CAB89001921BF /* Bvc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Bvc.h; sourceTree = "<group>"; };
+		1466A8E5207CAB89001921BF /* Bvc.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Bvc.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,6 +74,8 @@
 				143CC83F2069F55100D2C072 /* AppDelegate.m */,
 				143CC8412069F55100D2C072 /* ViewController.h */,
 				143CC8422069F55100D2C072 /* ViewController.m */,
+				1466A8E4207CAB89001921BF /* Bvc.h */,
+				1466A8E5207CAB89001921BF /* Bvc.m */,
 				143CC85E2069F81800D2C072 /* TestCell.h */,
 				143CC85F2069F81800D2C072 /* TestCell.m */,
 				143CC8582069F79600D2C072 /* UITextField+IX.h */,
@@ -159,6 +164,7 @@
 			files = (
 				143CC8432069F55100D2C072 /* ViewController.m in Sources */,
 				143CC8602069F81800D2C072 /* TestCell.m in Sources */,
+				1466A8E6207CAB89001921BF /* Bvc.m in Sources */,
 				143CC85D2069F7AA00D2C072 /* IXHookUtility.m in Sources */,
 				143CC84E2069F55200D2C072 /* main.m in Sources */,
 				143CC85A2069F79600D2C072 /* UITextField+IX.m in Sources */,
@@ -297,7 +303,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 8RT8SAJSN9;
 				INFOPLIST_FILE = KeyboardDemo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = Shenzhen.KeyboardDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -310,7 +318,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 8RT8SAJSN9;
 				INFOPLIST_FILE = KeyboardDemo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = Shenzhen.KeyboardDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
