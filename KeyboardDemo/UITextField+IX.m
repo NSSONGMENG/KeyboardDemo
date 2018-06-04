@@ -149,16 +149,21 @@ static char isSelfKey;
 
 - (void)keyboardWillHide:(NSNotification *)notify
 {
-    if (self.animated && ![self.targetV isKindOfClass:[UIScrollView class]]) {
+    if (self.animated) {
         self.animated = NO;
-        NSDictionary    * dic = notify.userInfo;
-        CGFloat time = [dic[@"UIKeyboardAnimationDurationUserInfoKey"] floatValue];
-        CGRect  frame = self.targetV.frame;
-        frame.origin.y = self.originY;
-        
-        [UIView animateWithDuration:time delay:0 options:UIViewAnimationOptionCurveEaseIn animations:^{
-            self.targetV.frame = frame;
-        } completion:nil];
+        if ([self.targetV isKindOfClass:[UIScrollView class]]) {
+            UIScrollView * scrollV = (UIScrollView *)self.targetV;
+            [scrollV setContentOffset:CGPointMake(scrollV.contentOffset.x, self.originY) animated:YES];
+        } else {
+            NSDictionary    * dic = notify.userInfo;
+            CGFloat time = [dic[@"UIKeyboardAnimationDurationUserInfoKey"] floatValue];
+            CGRect  frame = self.targetV.frame;
+            frame.origin.y = self.originY;
+            
+            [UIView animateWithDuration:time delay:0 options:UIViewAnimationOptionCurveEaseIn animations:^{
+                self.targetV.frame = frame;
+            } completion:nil];
+        }
     }
     
     self.originY = 0.f;
